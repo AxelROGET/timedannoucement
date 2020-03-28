@@ -1,0 +1,14 @@
+{
+  "name": "timedannouncement",
+  "version": "1.0.0",
+  "description": "Timer des annonces",
+  "main": "bot.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Axel ROGET",
+  "license": "ISC",
+  "dependencies": {
+    "discord.js": "^12.0.2"
+  }
+}
