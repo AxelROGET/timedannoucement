@@ -15,6 +15,7 @@ var tableauColor = [];
 var tableauImage = [];
 var tableauThumbnail = [];
 var tableauUrl = [];
+var tableauToken = [];
 
 client.on('ready', () => {
     console.log("Bot online");
@@ -71,7 +72,7 @@ client.on('message', message =>{
         case 'help':
             const embed = new Discord.MessageEmbed()
                 .setTitle("Messages programmés :")
-                .setDescription("!msg add [#channel] ")
+                .setDescription("**!msg add [#channel]** pour ajouter un message programmé (le reste du paramétrage se fera en message privé)\n\n**!msg edit [code unique]** pour modifier un message programmé déjà existant.")
                 .setColor('#fb6615')
                 .setFooter("Permission \"gérer les messages\" requise")
             message.channel.send(embed);
@@ -79,9 +80,8 @@ client.on('message', message =>{
         
         case 'add':
             console.log("Add");
-            if(message.member.permissions.has("MANAGE_MESSAGES") && message.channel.type === 'text'){
+            if(message.channel.type === 'text' && message.member.permissions.has("MANAGE_MESSAGES") &&  args[1] && client.channels.cache.has(args[1].substring(2).slice(0, -1))){
                 message.channel.bulkDelete(1);
-                
                 const embed = new Discord.MessageEmbed()
                     .setTitle("Création d'un message programmé :")
                     .setDescription("Nous avons presque fini de créer votre message mais il nous manque quelques informations :\n**Commencez par donner un titre à votre annonce...**")
@@ -95,7 +95,38 @@ client.on('message', message =>{
                 console.log("tableauChannel : " + tableauChannel);
                 tableauStep[tableauMessageMemberId.indexOf(message.member.id)] = 1;
                 console.log("tableauStep : " + tableauStep);
-                } 
+                }   else { // erreur lors de la création de l'annonce
+                    const embedError = new Discord.MessageEmbed()
+                        .setTitle("Erreur lors de la création de l'annonce :")
+                        .setDescription("L'erreur peut provenir :\n\n-Du manque de la permission nécessaire.\n\n-La commande n'a pas été effectuée dans un serveur.\n\n-Il manque un ou plusieurs arguments.\n\n-Le channel sélectionné n'est pas un channel valide.")
+                        .setFooter("!msg add [channel]")
+                        .setColor("#ff0000")
+                    message.channel.send(embedError);
+                }
+            break;
+
+        case 'edit':
+            if(tableauToken.indexOf(args[1]) !== -1){
+                var index = tableauToken.indexOf(args[1]);
+                tableauStep[index] = 4;
+                tableauMessageMemberId[index] = message.author.id;
+
+                if(message.channel.type === 'text'){message.channel.bulkDelete(1);}
+
+                const embed = new Discord.MessageEmbed()
+                    .setTitle("Modification du message :")
+                    .setDescription("Vous pouvez utiliser :\n\n**finish** pour sauvegarder.\n\n**preview** pour visualiser l'annonce.\n\n**date** pour modifier la date et l'heure de publication de l'annonce.\n\n**footer [texte]** pour ajouter un pied de page.\n\n**color [couleur]** pour personnaliser la couleur de l'annonce. Choix possibles : [rouge], [orange] et [vert] sinon utiliser une couleur hexadécimale.\n\n**image [URL de l'image]** pour ajouter une image en dessous de l'annonce.\n\n**thumbnail [URL de l'image]** pour ajouter une image en haut à droite.\n\n**url [URL]** pour ajouter un lien. Cela rendra le titre cliquable.\n\n**cancel** pour annuler l'annonce. Cette action est irréversible.")
+                    .setColor('#57ad44')
+                if(message.channel.type === 'text'){message.member.send(embed);} else {message.reply(embed);}
+
+            } else {
+                const embed = new Discord.MessageEmbed()
+                    .setTitle("Erreur !")
+                    .setDescription("Veuillez inclure un code valide.")
+                    .setFooter("!msg edit [code unique]")
+                    .setColor('#ff0000')
+                message.channel.send(embed);
+            }
             break;
     }
 
@@ -139,7 +170,7 @@ client.on('message', message =>{
 
             const embed = new Discord.MessageEmbed() // Embed pour les options facultative
                 .setTitle("Quelques finitions :")
-                .setDescription("Votre message est finit ! Utilisez les fonctions pour aller plus loin :\n\n**finish** pour sauvegarder. Le message ne pourra plus être modifié.\n\n**preview** pour visualiser l'annonce.\n\n**footer [texte]** pour ajouter un pied de page.\n\n**color [couleur]** pour personnaliser la couleur de l'annonce. Choix possibles : [rouge], [orange] et [vert] sinon utiliser une couleur hexadécimale.\n\n**image [URL de l'image]** pour ajouter une image en dessous de l'annonce.\n\n**thumbnail [URL de l'image]** pour ajouter une image en haut à droite.\n\n**url [URL]** pour ajouter un lien. Cela rendra le titre cliquable.")
+                .setDescription("Votre message est finit ! Utilisez les fonctions pour aller plus loin :\n\n**finish** pour sauvegarder.\n\n**preview** pour visualiser l'annonce.\n\n**date** pour modifier la date et l'heure de publication de l'annonce.\n\n**footer [texte]** pour ajouter un pied de page.\n\n**color [couleur]** pour personnaliser la couleur de l'annonce. Choix possibles : [rouge], [orange] et [vert] sinon utiliser une couleur hexadécimale.\n\n**image [URL de l'image]** pour ajouter une image en dessous de l'annonce.\n\n**thumbnail [URL de l'image]** pour ajouter une image en haut à droite.\n\n**url [URL]** pour ajouter un lien. Cela rendra le titre cliquable.\n\n**cancel** pour annuler l'annonce. Cette action est irréversible.")
                 .setColor('#57ad44')
             message.channel.send(embed);
 
@@ -163,9 +194,11 @@ client.on('message', message =>{
                 case 'finish':
                     tableauMessageMemberId[index] = "finish"
 
+                    tableauToken[index] = Math.random().toString().substring(2);
+
                     const embed = new Discord.MessageEmbed()
                         .setTitle("C'est fini !")
-                        .setDescription("Et voilà, vous avez fini de configurer votre message !")
+                        .setDescription("Et voilà, vous avez fini de configurer votre message !\nSachez que vous pouvezle modifier grâce au code suivant :** " + tableauToken[index] + "**.\n\nPour le modifier, il vous suffit d'utiliser la commande __**!msg edit [code unique]**__")
                         .setColor('#57ad44')
                     message.channel.send(embed);
                     break;
@@ -224,11 +257,27 @@ client.on('message', message =>{
                             embed2.setFooter("Made by Axel ROGET :\nhttps://instagram.com/axel_roget")
                         }
                     message.channel.send(embed2)
+                    break;
+
+                case 'date':
+                    const embed3 = new Discord.MessageEmbed()
+                        .setTitle("Modification de la date :")
+                        .setDescription("D'accord, modifions l'heure.")
+                        .setFooter("Veuillez respecter la forme suivante : (sans crochets)\n[jour] [mois] [heure] [minute]\nChaque argument doit être en 2 chiffres.\nPar exemple : 5 heures >>> 05")
+                        .setColor('#57ad44')
+                    message.channel.send(embed3);
+                    tableauStep[index] = 3;
+                    break;
+
+                case 'cancel':
+                    tableauTimeCode[index] = 'Cancelled';
+                    message.channel.send("```Message supprimé avec succès```");
+                    break;
 
                 default:
                     const embedError = new Discord.MessageEmbed()
                         .setTitle("Erreur avec le premier argument :")
-                        .setDescription("**__" + args[0] + "__** n'est pas un argument valide.\nVoici les arguments valides :\n\n**finish** pour sauvegarder. Le message ne pourra plus être modifié.\n\n**preview** pour visualiser l'annonce.\n\n**footer [texte]** pour ajouter un pied de page.\n\n**color [couleur]** pour personnaliser la couleur de l'annonce. Choix possibles : [rouge], [orange] et [vert] sinon utiliser une couleur hexadécimale.\n\n**image [URL de l'image]** pour ajouter une image en dessous de l'annonce.\n\n**thumbnail [URL de l'image]** pour ajouter une image en haut à droite.\n\n**url [URL]** pour ajouter un lien. Cela rendra le titre cliquable.")
+                        .setDescription("**__" + args[0] + "__** n'est pas un argument valide.\nVoici les arguments valides :\n\n**finish** pour sauvegarder.\n\n**preview** pour visualiser l'annonce.\n\n**date** pour modifier la date et l'heure de publication de l'annonce.\n\n**footer [texte]** pour ajouter un pied de page.\n\n**color [couleur]** pour personnaliser la couleur de l'annonce. Choix possibles : [rouge], [orange] et [vert] sinon utiliser une couleur hexadécimale.\n\n**image [URL de l'image]** pour ajouter une image en dessous de l'annonce.\n\n**thumbnail [URL de l'image]** pour ajouter une image en haut à droite.\n\n**url [URL]** pour ajouter un lien. Cela rendra le titre cliquable.\n\n**cancel** pour annuler l'annonce. Cette action est irréversible.")
                         .setColor('#ff0000')
                     message.channel.send(embedError);
                 
@@ -244,7 +293,5 @@ client.on('message', message =>{
     args = [];
     
 });
-
-
 
 client.login(process.env.TOKEN);
