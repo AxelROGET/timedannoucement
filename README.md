@@ -4,7 +4,7 @@ PATCH NOTE 1.3 (07/04/2020):
 PROCHAINES FONCTIONALITES :
 - Ajout du \n pour pouvoir passer à la ligne dans la description et les autres zones de textes (hormis le titre).
 
---
+---------------------------------------------------
 
 PATCH NOTE 1.2 :
 - Ajout de la possibilité de modifier un message personnalisé, ainsi que de modifier la date et l'heure de sa publication.
