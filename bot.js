@@ -38,7 +38,7 @@ client.on('ready', () => {
         }
 
         const date = new Date();
-        var timeCode = ("0"+date.getDate()).slice(-2) +"/"+("0"+(date.getMonth()+1)).slice(-2) + "/" + ("0"+(date.getHours()+2)).slice(-2) + "/" + ("0"+date.getMinutes()).slice(-2);
+        var timeCode = ("0"+date.getDate()).slice(-2) +"/"+("0"+(date.getMonth()+1)).slice(-2) + "/" + ("0"+(date.getHours()+1)).slice(-2) + "/" + ("0"+date.getMinutes()).slice(-2);
         //var timeCode = ("0"+date.getMinutes()).slice(-2) +"/"+ ("0"+(date.getHours()+1)).slice(-2) +"/"+ ("0"+date.getDate()).slice(-2) +"/"+ ("0"+(date.getMonth()+1)).slice(-2);
         console.log(timeCode);
 
@@ -127,7 +127,7 @@ client.on('message', message =>{
                     .setColor('#ff0000')
                 message.channel.send(embed);
             }
-            break;
+            return;
     }
 
     if(message.channel.type === 'dm' && tableauMessageMemberId.indexOf(message.author.id) !== -1 ){
@@ -156,7 +156,7 @@ client.on('message', message =>{
             const embed = new Discord.MessageEmbed()
                 .setTitle("Création d'un message programmé :")
                 .setDescription("Excellent, la description de l'annonce est __" + message.content + "__.\nPassons au moment de publication de l'annonce :\nSélectionnez maintenant une date et une heure de publication.")
-                .setFooter("Veuillez respecter la forme suivante : (sans crochets)\n[jour] [mois] [heure] [minute]\nChaque argument doit être en 2 chiffres.\nPar exemple : 5 heures >>> 05")
+                .setFooter("Veuillez respecter la forme suivante : (sans crochets)\n[jour] [mois] [heure] [minute]\nChaque argument doit être en 2 chiffres.\nPar exemple : 5 heures >>> 05\n\nVous pouvez aussi utiliser __**now**__ au lieu de la commande pour publier le message dès l'utilisation de **finish**")
                 .setColor('#fb6615')
             message.channel.send(embed);
         } else if(step === 3){ // 3ème étape
@@ -174,6 +174,16 @@ client.on('message', message =>{
                 .setColor('#57ad44')
             message.channel.send(embed);
 
+            } else if(message.content === "now"){ // Utilisation de "now"
+                tableauStep[index] = 4;
+                tableauTimeCode[index] = 'now';
+                console.log("NOW");
+
+                const embed = new Discord.MessageEmbed() // Embed pour les options facultative + NOW
+                .setTitle("Quelques finitions :")
+                .setDescription("Votre message est finit ! Utilisez les fonctions pour aller plus loin :\n\n**finish** pour sauvegarder.\n\n**preview** pour visualiser l'annonce.\n\n**date** pour modifier la date et l'heure de publication de l'annonce.\n\n**footer [texte]** pour ajouter un pied de page.\n\n**color [couleur]** pour personnaliser la couleur de l'annonce. Choix possibles : [rouge], [orange] et [vert] sinon utiliser une couleur hexadécimale.\n\n**image [URL de l'image]** pour ajouter une image en dessous de l'annonce.\n\n**thumbnail [URL de l'image]** pour ajouter une image en haut à droite.\n\n**url [URL]** pour ajouter un lien. Cela rendra le titre cliquable.\n\n**cancel** pour annuler l'annonce. Cette action est irréversible.")
+                .setColor('#57ad44')
+                message.channel.send(embed);
             } else {
             const embed = new Discord.MessageEmbed() // embed pour signaler l'erreur
                 .setTitle("Erreur !")
@@ -192,15 +202,37 @@ client.on('message', message =>{
             switch (args[0]){
 
                 case 'finish':
-                    tableauMessageMemberId[index] = "finish"
+                    tableauMessageMemberId[index] = "finish";
 
-                    tableauToken[index] = Math.random().toString().substring(2);
+                    if(tableauTimeCode[index] !== 'now'){ // TimeCode normal
 
-                    const embed = new Discord.MessageEmbed()
-                        .setTitle("C'est fini !")
-                        .setDescription("Et voilà, vous avez fini de configurer votre message !\nSachez que vous pouvezle modifier grâce au code suivant :** " + tableauToken[index] + "**.\n\nPour le modifier, il vous suffit d'utiliser la commande __**!msg edit [code unique]**__")
-                        .setColor('#57ad44')
-                    message.channel.send(embed);
+                        tableauToken[index] = Math.random().toString().substring(2);
+
+                        const embed = new Discord.MessageEmbed()
+                            .setTitle("C'est fini !")
+                            .setDescription("Et voilà, vous avez fini de configurer votre message !\nSachez que vous pouvezle modifier grâce au code suivant :** " + tableauToken[index] + "**.\n\nPour le modifier, il vous suffit d'utiliser la commande __**!msg edit [code unique]**__")
+                            .setColor('#57ad44')
+                        message.channel.send(embed);
+
+                    } else { // Utilisation de Now : envoie du message
+                        message.channel.send("```Envoie du message en cours...```");
+
+                        const embed = new Discord.MessageEmbed()
+                            .setTitle(tableauTitle[index])
+                            .setDescription(tableauDescription[index])
+                            .setImage(tableauImage[index])
+                            .setThumbnail(tableauThumbnail[index])
+                            .setColor(tableauColor[index])
+                            .setURL(tableauUrl[index])
+                            if(tableauFooter[index]){
+                                embed.setFooter(tableauFooter[index] + "\n\nMade by Axel ROGET :\nhttps://instagram.com/axel_roget")
+                            } else {
+                                embed.setFooter("Made by Axel ROGET :\nhttps://instagram.com/axel_roget")
+                            }
+                        client.channels.cache.get(tableauChannel[index]).send(embed);
+                        tableauTimeCode[index] = "avowed";
+
+                    }
                     break;
 
                 case 'footer':
@@ -225,22 +257,22 @@ client.on('message', message =>{
                         console.log("Couleur custom");
                         tableauColor[index] = args[1];
                     }
-                    message.reply("```Couleur ajouté avec succès !```")
+                    message.reply("```Couleur ajouté avec succès !```");
                     break;
 
                 case 'image':
                     tableauImage[index] = args[1];
-                    message.reply("```Image ajouté avec succès !```")
+                    message.reply("```Image ajouté avec succès !```");
                     break;
                 
                 case 'thumbnail':
                     tableauThumbnail[index] = args[1];
-                    message.reply("```Image ajouté avec succès !```")
+                    message.reply("```Image ajouté avec succès !```");
                     break;
 
                 case 'url':
                     tableauUrl[index] = args[1];
-                    message.reply("```URL ajouté avec succès !```")
+                    message.reply("```URL ajouté avec succès !```");
                     break;
 
                 case 'preview':
@@ -293,5 +325,4 @@ client.on('message', message =>{
     args = [];
     
 });
-
 client.login(process.env.TOKEN);
