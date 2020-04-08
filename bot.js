@@ -38,7 +38,7 @@ client.on('ready', () => {
         }
 
         const date = new Date();
-        var timeCode = ("0"+date.getDate()).slice(-2) +"/"+("0"+(date.getMonth()+1)).slice(-2) + "/" + ("0"+(date.getHours()+1)).slice(-2) + "/" + ("0"+date.getMinutes()).slice(-2);
+        var timeCode = ("0"+date.getDate()).slice(-2) +"/"+("0"+(date.getMonth()+1)).slice(-2) + "/" + ("0"+(date.getHours()+2)).slice(-2) + "/" + ("0"+date.getMinutes()).slice(-2);
         //var timeCode = ("0"+date.getMinutes()).slice(-2) +"/"+ ("0"+(date.getHours()+1)).slice(-2) +"/"+ ("0"+date.getDate()).slice(-2) +"/"+ ("0"+(date.getMonth()+1)).slice(-2);
         console.log(timeCode);
 
