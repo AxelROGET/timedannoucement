@@ -5,7 +5,6 @@ Vous pouvez ajouter le bot à votre serveur grâce au lien suivant : https://dis
 -----------------------------------------------------
 
 PROCHAINES FONCTIONALITES :
-- Ajout du \n pour pouvoir passer à la ligne dans la description et les autres zones de textes (hormis le titre).
 - Ajout d'un message lorsque le bot arrive sur un serveur.
 - Ajout d'un message d'annonce pour énoncer les nouvelles fonctionnalités à chaque patch note.
 - Ajout d'un grade "serveur prioritaire" pour retirer l'auteur et la publicité sur les annonces.
